@@ -2,7 +2,6 @@ import express from 'express';
 import UserService from "../service/UserService";
 
 
-console.log("userController.ts");
 
 class UserController{
     async getUserById(req: express.Request, res: express.Response) {
@@ -51,4 +50,21 @@ class UserController{
           res.status(500).send('Internal Server Error.');
         }
       }
+
+      async registerUser(req: express.Request, res: express.Response) {
+        const { email, username, password } = req.body;
+        try {
+          const user = await UserService.registerUser(email, username, password);
+          if ('error' in user) {
+            res.status(400).send(user.error);
+          } else {
+            res.status(201).send(user);
+          }
+        } catch (error) {
+          console.error(error);
+          res.status(500).send('Internal Server Error.');
+        }
+      }
 }
+
+export default new UserController();

@@ -35,18 +35,7 @@ class UserService {
         }
     }
 
-    async registerUser(email: string, username: string, password: string) {
-        if(!email || !username || !password) {
-            return { error: "Invalid data." };
-        }
-        try{
-            const user = await UserDao.createUser(email, username, password);
-            return user;
-        }catch(error){
-            console.error(error);
-            return { error: "Internal Server Error." };
-        }
-    }
+
 
     async userLogin(email: string, password: string) {
       const user = await this.getUserByEmail(email)
@@ -85,6 +74,24 @@ class UserService {
           } else {
             const deletedUser = await UserDao.deleteUser(id);
             return deletedUser;
+          }
+        } catch (error) {
+          console.error(error);
+          return { error: 'Internal Server Error.' };
+        }
+      }
+
+      async registerUser(email: string, username: string, password: string) {
+        if (!email || !username || !password) {
+          return { error: 'Bad Request.' };
+        }
+        try {
+          const checkUser = await UserDao.getUserByEmail(email);
+          if (checkUser) {
+            return { error: 'User already exists.' };
+          } else {
+            const newUser = await UserDao.createUser(email, username, password);
+            return newUser;
           }
         } catch (error) {
           console.error(error);
