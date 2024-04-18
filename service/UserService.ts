@@ -1,6 +1,19 @@
 import UserDao from "../dao/UserDao";
 
 class UserService {
+  async getAllUsers() {
+    try {
+      const users = await UserDao.getAllUsers();
+      if (!users) {
+        return { error: 'No users found.' };
+      } else {
+        return users;
+      }
+    } catch (error) {
+      console.error(error);
+      return { error: 'Internal Server Error.' };
+    }
+  }
     async getUserById(id: number) {
         if(!id) {
             return { error: "Invalid ID." };
@@ -98,7 +111,12 @@ class UserService {
           return { error: 'Internal Server Error.' };
         }
       }
-    
+
+      async buyPogs(user_id: number, pog_id: number, quantity) {
+        const getUser = await UserDao.getUserById(user_id);
+        if (!getUser) return { error: "User not found." };
+        const.getPog = await PogDao.getPogById(pog_id);
+      }
 }
 
 export default new UserService();

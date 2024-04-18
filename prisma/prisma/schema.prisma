@@ -15,9 +15,7 @@ model User {
   email    String   @unique
   username String
   password String
-  fundsL   Float
   type     String
-  wallet   Int[]
   Wallet   Wallet[]
 }
 
@@ -27,7 +25,10 @@ model Wallet {
   pogsId     Int
   user       User @relation(fields: [userId], references: [id])
   userId     Int
-  pogs_count Int  @default(0)
+  quantity   Int
+  balance    Float
+  created    DateTime @default(now())
+  updateTime DateTime @updatedAt
 }
 
 model Pogs {

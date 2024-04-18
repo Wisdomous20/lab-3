@@ -4,6 +4,19 @@ import UserService from "../service/UserService";
 
 
 class UserController{
+  async getAllUsers(req: express.Request, res: express.Response) {
+    try {
+      const users = await UserService.getAllUsers();
+      if ('error' in users) {
+        res.status(404).send(users.error);
+      } else {
+        res.status(200).send(users);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal Server Error.');
+    }
+  }
     async getUserById(req: express.Request, res: express.Response) {
         const id = Number(req.params.id);
         try {
@@ -60,6 +73,17 @@ class UserController{
           } else {
             res.status(201).send(user);
           }
+        } catch (error) {
+          console.error(error);
+          res.status(500).send('Internal Server Error.');
+        }
+      }
+
+      async buyPogs(req: express.Request, res: express.Response) {
+        const { user_id, pog_id, quantity } = req.body;
+        try {
+          const user = await UserService.buyPogs(user_id, pog_id, quantity);
+          res.status(200).send(user);
         } catch (error) {
           console.error(error);
           res.status(500).send('Internal Server Error.');
