@@ -43,6 +43,16 @@ class PogDao{
             where: { id }
         });
     }
+
+    async PogsBytickerSymbol(tickerSymbol: string){
+        return await prisma.pog.findMany({
+            where: {
+                tickerSymbol: tickerSymbol
+            }
+        });
+    }
+
+    
 }
 
 export default new PogDao();
