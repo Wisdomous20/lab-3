@@ -1,9 +1,23 @@
 import express from 'express';
+import { Request, Response } from 'express';
+
 import UserService from "../service/UserService";
 
 
 
 class UserController{
+  async registerUser(req: Request, res: Response) {
+    const { email, username, password } = req.body;
+
+    try{
+      const newUser = await UserService.registerUser(email, username, password);
+      res.status(201).send(newUser);
+    }catch(error){
+      console.error(error);
+      res.status(500).send('Internal Server Error.');
+    }
+  }
+
   async getAllUsers(req: express.Request, res: express.Response) {
     try {
       const users = await UserService.getAllUsers();
@@ -64,20 +78,7 @@ class UserController{
         }
       }
 
-      async registerUser(req: express.Request, res: express.Response) {
-        const { email, username, password } = req.body;
-        try {
-          const user = await UserService.registerUser(email, username, password);
-          if ('error' in user) {
-            res.status(400).send(user.error);
-          } else {
-            res.status(201).send(user);
-          }
-        } catch (error) {
-          console.error(error);
-          res.status(500).send('Internal Server Error.');
-        }
-      }
+
 
       async buyPogs(req: express.Request, res: express.Response) {
         const { user_id, pog_id, quantity } = req.body;
