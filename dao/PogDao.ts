@@ -4,11 +4,11 @@ const prisma = new PrismaClient();
 
 class PogDao{
     async getAllPogs(){
-        return await prisma.pog.findMany();
+        return await prisma.pogs.findMany();
     }
 
     async getPogById(id: number){
-        return await prisma.pog.findUnique({
+        return await prisma.pogs.findUnique({
             where: {
                 id: id
             }
@@ -16,13 +16,13 @@ class PogDao{
     }
 
     async createPog(data: any){
-        return await prisma.pog.create({
+        return await prisma.pogs.create({
             data
         });
     }
 
     async updatePog(id: number, data: any){
-        return await prisma.pog.update({
+        return await prisma.pogs.update({
             where: { id },
             data
         });
@@ -32,22 +32,22 @@ class PogDao{
         const list = await this.getAllPogs();
         
         for(let pogs of list){
-            const currentPrice = pogs.price;
+            const currentPrice = pogs.current_price;
             const price = Math.floor(Math.random() * 1000);
             await this.updatePog(pogs.id, {price: price, previousPrice: currentPrice});
         }
     }
 
     async deletePog(id: number){
-        return await prisma.pog.delete({
+        return await prisma.pogs.delete({
             where: { id }
         });
     }
 
     async PogsBytickerSymbol(tickerSymbol: string){
-        return await prisma.pog.findMany({
+        return await prisma.pogs.findMany({
             where: {
-                tickerSymbol: tickerSymbol
+                ticker_symbol: tickerSymbol
             }
         });
     }

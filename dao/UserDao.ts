@@ -3,15 +3,17 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 class UserDAO {
+
     async createUser(email: string, username: string, password: string) {
-        return await prisma.user.create({
-            data: {
-                email,
-                username,
-                password
-            }
-        });
-    }
+            return await prisma.user.create({
+                data: {
+                    email,
+                    username,
+                    password,
+                    type: 'user' 
+                }
+            });
+        }
 
     async getUserById(id: number) {
         return await prisma.user.findUnique({

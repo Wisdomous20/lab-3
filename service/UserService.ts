@@ -114,33 +114,33 @@ class UserService {
     }
   }
 
-  async buyPogs(user_id: number, pog_id: number, quantity) {
+  async buyPogs(user_id: number, pog_id: number, quantity: number) {
     const getUser = await UserDao.getUserById(user_id);
     if (!getUser) return { error: "User not found." };
     const getPog = await PogDao.getPogById(pog_id);
     if (!getPog) return { error: "Pog not found." };
     const wallet = await walletDao.getWalletById(user_id);
-    if ("error" in wallet) return wallet.error;
+    if (!wallet || "error" in wallet) return wallet?.error || { error: "Wallet not found." };
     else {
-      if (wallet.balance < getPog.price * quantity) {
+      if (wallet.balance < getPog.current_price * quantity) {
         return { error: "Insufficient balance." };
       } else {
-        const newBalance = wallet.balance - getPog.price * quantity;
+        const newBalance = wallet.balance - getPog.current_price * quantity;
         await walletDao.updateWallet(user_id, { balance: newBalance });
         return { message: "Transaction successful." }
       }
     }
   }
 
-  async sellPogs(user_id: number, pog_id: number, quantity) {
+  async sellPogs(user_id: number, pog_id: number, quantity: number) {
     const user = await UserDao.getUserById(user_id);
     if (!user) return { error: "User not found." };
     const pog = await PogDao.getPogById(pog_id);
     if (!pog) return { error: "Pog not found." };
     const wallet = await walletDao.getWalletById(user_id);
-    if ("error" in wallet) return wallet.error;
+    if (!wallet || "error" in wallet) return wallet?.error || { error: "Wallet not found." };
     else {
-      const newBalance = wallet.balance + pog.price * quantity;
+      const newBalance = wallet.balance + pog.current_price * quantity;
       await walletDao.updateWallet(wallet.id, { balance: newBalance });
       return { message: "Transaction successful." };
     }
@@ -150,7 +150,7 @@ class UserService {
     const user = await UserDao.getUserById(user_id);
     if (!user) return { error: "User not found." };
     const wallet = await walletDao.getWalletById(user_id);
-    if ("error" in wallet) return wallet.error;
+    if (!wallet || "error" in wallet) return wallet?.error || { error: "Wallet not found." };
     else {
       const newBalance = wallet.balance + amount;
       await walletDao.updateWallet(wallet.id, { balance: newBalance });
