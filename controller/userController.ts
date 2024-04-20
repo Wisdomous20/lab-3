@@ -89,6 +89,67 @@ class UserController{
           res.status(500).send('Internal Server Error.');
         }
       }
+
+      async sellPogs(req: express.Request, res: express.Response) {
+        const { user_id, pog_id, quantity } = req.body;
+        try {
+          const user = await UserService.sellPogs(user_id, pog_id, quantity);
+          res.status(200).send(user);
+        } catch (error) {
+          console.error(error);
+          res.status(500).send('Internal Server Error.');
+        }
+      }
+
+      async updateUser(req: express.Request, res: express.Response) {
+        const id = Number(req.params.id);
+        const data = req.body;
+    
+        try {
+          const updatedUser = await UserService.updateUser(id, data);
+          res.status(200).send(updatedUser);
+        } catch (error) {
+          console.error(error);
+          res.status(500).send('Internal Server Error.');
+        }
+      }
+
+      async deleteUser(req: express.Request, res: express.Response) {
+        const id = Number(req.params.id);
+        try{
+          const deletedUser = await UserService.deleteUser(id);
+          res.status(200).send(deletedUser);
+        }catch(error){
+          console.error(error);
+          res.status(500).send('Internal Server Error.');
+        }
+      }
+
+      async increaseBalance(req: express.Request, res: express.Response) {
+        const { user_id, amount } = req.body;
+        try {
+          const user = await UserService.increaseBalance(user_id, amount);
+          res.status(200).send(user);
+        } catch (error) {
+          console.error(error);
+          res.status(500).send('Internal Server Error.');
+        }
+      }
+
+      async getCurrentUser(req: express.Request, res: express.Response) {
+        const id = Number(req.params.id);
+        try {
+          const user = await UserService.getUserById(id);
+          if (user.error) {
+            res.status(404).send(user.error);
+          } else {
+            res.status(200).send(user);
+          }
+        } catch (error) {
+          console.error(error);
+          res.status(500).send('Internal Server Error.');
+        }
+      }
 }
 
 export default new UserController();

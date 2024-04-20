@@ -137,14 +137,26 @@ class UserService {
     if (!user) return { error: "User not found." };
     const pog = await PogDao.getPogById(pog_id);
     if (!pog) return { error: "Pog not found." };
-    const wallet = await walletDao.getWalletById(user_id);  
+    const wallet = await walletDao.getWalletById(user_id);
     if ("error" in wallet) return wallet.error;
     else {
       const newBalance = wallet.balance + pog.price * quantity;
       await walletDao.updateWallet(wallet.id, { balance: newBalance });
       return { message: "Transaction successful." };
+    }
   }
-}
+
+  async increaseBalance(user_id: number, amount: number) {
+    const user = await UserDao.getUserById(user_id);
+    if (!user) return { error: "User not found." };
+    const wallet = await walletDao.getWalletById(user_id);
+    if ("error" in wallet) return wallet.error;
+    else {
+      const newBalance = wallet.balance + amount;
+      await walletDao.updateWallet(wallet.id, { balance: newBalance });
+      return { message: "Balance updated." };
+    }
+  }
 }
 
 export default new UserService();
