@@ -140,7 +140,7 @@ class UserController{
         const id = Number(req.params.id);
         try {
           const user = await UserService.getUserById(id);
-          if (user.error) {
+          if ('error' in user) {
             res.status(404).send(user.error);
           } else {
             res.status(200).send(user);

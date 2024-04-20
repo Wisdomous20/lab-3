@@ -39,7 +39,7 @@ class WalletDao {
     async getWalletByUser(user_id: number){
         const user = await prisma.wallet.findMany({
             where: {
-                user_id: user_id
+                userId: user_id
             }
         });
 
