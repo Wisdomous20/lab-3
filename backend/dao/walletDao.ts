@@ -35,6 +35,16 @@ class WalletDao {
             where: { id }
         });
     }
+
+    async getWalletByUser(user_id: number){
+        const user = await prisma.wallet.findMany({
+            where: {
+                userId: user_id
+            }
+        });
+
+        return user;
+    }
 }
 
 export default new WalletDao();
