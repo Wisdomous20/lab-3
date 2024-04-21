@@ -1,12 +1,16 @@
-import { useState } from "react";
 import Login from "../src/components/Login";
+import NavBar from "../src/components/NavBar";
+import Pog from "./components/Pog";
+import Wallet from "./components/Wallet";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <>
-      <Login />
+      <NavBar />
+      <Wallet />
+      <Pog />
+      {/* <Login /> */}
+
     </>
   );
 }
