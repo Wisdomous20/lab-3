@@ -1,6 +1,10 @@
 import UserDao from "../dao/UserDao";
 import PogDao from "../dao/PogDao";
 import walletDao from "../dao/walletDao";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 class UserService {
   async getAllUsers() {
@@ -50,15 +54,52 @@ class UserService {
     }
   }
 
-
-
   async userLogin(email: string, password: string) {
-    const user = await this.getUserByEmail(email)
-    if ("error" in user) return user.error;
-    if (user.password === password) {
-      return user;
+    const SECRET_KEY = process.env.SECRET_KEY || 'default_secret_key';
+    if (!email || !password) {
+      return { error: 'Bad Request.' };
+    }
+    try {
+      const user = await UserDao.getUserByEmail(email);
+      if (!user) return { error: "User not found." };
+  
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) {
+        const token = jwt.sign({ _id: user.id?.toString(), name: user.username }, SECRET_KEY, {
+          expiresIn: '2 days',
+        });
+        return { user: { id: user.id, name: user.username }, token: token };
+      } else {
+        return { error: 'Password incorrect.' };
+      }
+    } catch (error) {
+      console.error(error);
+      return { error: "Internal Server Error." };
     }
   }
+  
+  async registerUser(email: string, username: string, password: string) {
+    if (!email || !username || !password) {
+      return { error: 'Bad Request.' };
+    }
+    try {
+      const checkUser = await UserDao.getUserByEmail(email);
+      if (checkUser) {
+        return { error: 'User already exists.' };
+      } else {
+        // Bcrypt the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await UserDao.createUser(email, username, hashedPassword);
+
+        return newUser
+      }
+      
+    } catch (error) {
+      console.error(error);
+      return { error: 'Internal Server Error.' };
+    }
+  }
+  
 
   async updateUser(id: number, data: any) {
     if (!id || !data || Object.keys(data).length === 0) {
@@ -96,23 +137,7 @@ class UserService {
     }
   }
 
-  async registerUser(email: string, username: string, password: string) {
-    if (!email || !username || !password) {
-      return { error: 'Bad Request.' };
-    }
-    try {
-      const checkUser = await UserDao.getUserByEmail(email);
-      if (checkUser) {
-        return { error: 'User already exists.' };
-      } else {
-        const newUser = await UserDao.createUser(email, username, password);
-        return newUser;
-      }
-    } catch (error) {
-      console.error(error);
-      return { error: 'Internal Server Error.' };
-    }
-  }
+
 
   async buyPogs(user_id: number, pog_id: number, quantity: number) {
     const getUser = await UserDao.getUserById(user_id);

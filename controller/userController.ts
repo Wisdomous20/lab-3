@@ -1,22 +1,11 @@
 import express from 'express';
 import { Request, Response } from 'express';
-
 import UserService from "../service/UserService";
+import jwt from 'jsonwebtoken';
 
 
 
 class UserController{
-  async registerUser(req: Request, res: Response) {
-    const { email, username, password } = req.body;
-
-    try{
-      const newUser = await UserService.registerUser(email, username, password);
-      res.status(201).send(newUser);
-    }catch(error){
-      console.error(error);
-      res.status(500).send('Internal Server Error.');
-    }
-  }
 
   async getAllUsers(req: express.Request, res: express.Response) {
     try {
@@ -60,16 +49,28 @@ class UserController{
           res.status(500).send('Internal Server Error.');
         }
       }
+      
+      async registerUser(req: Request, res: Response) {
+        const { email, username, password } = req.body;
+    
+        try{
+          const newUser = await UserService.registerUser(email, username, password);
+          res.status(201).send(newUser);
+        }catch(error){
+          console.error(error);
+          res.status(500).send('Internal Server Error.');
+        }
+      }
 
       async userLogin(req: express.Request, res: express.Response) {
         const { email, password } = req.body;
-    
         try {
-          const user = await UserService.userLogin(email, password);
-          if (typeof user === "string" || !user) res.status(404).send(user);
+          const awaitUser = await UserService.userLogin(email, password);
+          if (typeof awaitUser === "string" || !awaitUser) res.status(404).send(awaitUser);
           else {
-            const userId = user.id;
-            const send = { userId};
+            const userId = awaitUser.user?.id; 
+            const token = jwt.sign(awaitUser, 'super secret key here');
+            const send = { userId, token };
             res.status(200).send(send);
           }
         } catch (error) {
@@ -77,8 +78,6 @@ class UserController{
           res.status(500).send('Internal Server Error.');
         }
       }
-
-
 
       async buyPogs(req: express.Request, res: express.Response) {
         const { user_id, pog_id, quantity } = req.body;
