@@ -69,8 +69,9 @@ class UserController {
       if (typeof awaitUser === "string" || !awaitUser) res.status(404).send(awaitUser);
       else {
         const userId = awaitUser.user?.id;
+        const userType = awaitUser.user?.userType;
         const token = jwt.sign(awaitUser, 'super secret key here');
-        const send = { userId, token };
+        const send = { userId, token, userType };
         res.status(200).send(send);
       }
     } catch (error) {

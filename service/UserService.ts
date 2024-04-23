@@ -68,7 +68,7 @@ class UserService {
         const token = jwt.sign({ _id: user.id?.toString(), name: user.username }, SECRET_KEY, {
           expiresIn: '2 days',
         });
-        return { user: { id: user.id, name: user.username }, token: token };
+        return { user: { id: user.id, name: user.username, userType: user.type }, token: token };
       } else {
         return { error: 'Password incorrect.' };
       }
