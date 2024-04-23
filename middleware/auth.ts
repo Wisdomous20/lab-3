@@ -12,4 +12,4 @@ export const auth = (req: any, res: any, next: any) => {
   } catch (error) {
     res.status(400).send('Invalid Token');
   }
-}
+} 

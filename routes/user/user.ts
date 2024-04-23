@@ -3,7 +3,7 @@ import UserController from "../../controller/userController";
 import { auth } from '../../middleware/auth';
 export const userRouter = Router();
 
-userRouter.get('/api/:id', UserController.getUserById);
+userRouter.get('/api/:id', auth, UserController.getUserById);
 userRouter.get('/api', UserController.getAllUsers);
 userRouter.get('/api-get-email', UserController.getUserByEmail);
 userRouter.post('/api-login', UserController.userLogin);
