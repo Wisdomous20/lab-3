@@ -42,10 +42,19 @@ class PogDao {
 
     for (let pogs of list) {
       const currentPrice = pogs.current_price;
-      const price = Math.floor(Math.random() * 1000);
+
+      const priceRange = currentPrice * 0.1;
+
+      const price =
+        Math.floor(
+          Math.random() *
+            (currentPrice + priceRange - (currentPrice - priceRange))
+        ) +
+        (currentPrice - priceRange);
+
       await this.updatePog(pogs.id, {
-        price: price,
-        previousPrice: currentPrice,
+        current_price: price,
+        previous_price: currentPrice,
       });
     }
   }
