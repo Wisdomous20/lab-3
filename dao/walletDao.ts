@@ -7,10 +7,11 @@ class WalletDao {
         return await prisma.wallet.findMany();
     }
 
-    async getWalletById(id: number) {
+    async getWalletById(id: number, pogsId: number) {
         return await prisma.wallet.findUnique({
             where: {
-                id: id
+                id: id,
+                pogsId: pogsId
             }
         });
     }

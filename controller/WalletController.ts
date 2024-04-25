@@ -19,8 +19,9 @@ class WalletController {
 
     async getWalletById(req: express.Request, res: express.Response) {
         const id = Number(req.params.id);
+        const pogsId = Number(req.params.pogsId);
         try {
-            const wallet = await walletService.getWalletById(id);
+            const wallet = await walletService.getWalletById(id, pogsId);
             if ('error' in wallet) {
                 res.status(404).send(wallet.error);
             } else {
@@ -50,10 +51,12 @@ class WalletController {
 
     async updateWallet(req: express.Request, res: express.Response) {
         const id = Number(req.params.id);
+        const pogsId = Number(req.params.pogsId);
         const data = req.body;
 
         try{
-            const walletUpdate = await walletService.updateWallet(id, data);
+        const pogsId = Number(req.params.pogsId);
+        const walletUpdate = await walletService.updateWallet(id, data, pogsId);
             res.status(200).send(walletUpdate);
         }
         catch(error){
@@ -64,8 +67,9 @@ class WalletController {
 
     async deleteWallet(req: express.Request, res: express.Response) {
         const id = Number(req.params.id);
+        const pogsId = Number(req.params.pogsId);
         try{
-            const walletDelete = await walletService.deleteWallet(id);
+            const walletDelete = await walletService.deleteWallet(id, pogsId);
             res.status(200).send(walletDelete);
         } catch(error){
             console.error(error);

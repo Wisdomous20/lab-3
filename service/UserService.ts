@@ -148,8 +148,7 @@ class UserService {
 
     const getPog = await PogDao.getPogById(Number(pog_id));
     if (!getPog) return { error: "Pog not found." };
-
-    let wallet = await walletDao.getWalletById(Number(user_id));
+    let wallet = await walletDao.getWalletById(Number(user_id), Number(pog_id));
     if(getUser.balance < getPog.current_price * quantity) return { error: "Insufficient balance." };
 
     if (!wallet || "error" in wallet){
@@ -172,7 +171,7 @@ class UserService {
     if (!user) return { error: "User not found." };
     const pog = await PogDao.getPogById(Number(pog_id));
     if (!pog) return { error: "Pog not found." };
-    const wallet = await walletDao.getWalletById(Number(user_id));
+    const wallet = await walletDao.getWalletById(Number(user_id), Number(pog_id));
     if (!wallet || "error" in wallet) return wallet?.error || { error: "Wallet not found." };
     else {
       const newBalance = user.balance + pog.current_price * quantity;
@@ -184,13 +183,8 @@ class UserService {
   async increaseBalance(user_id: number, amount: number) {
     const user = await UserDao.getUserById(Number(user_id));
     if (!user) return { error: "User not found." };
-    const wallet = await walletDao.getWalletById(Number(user_id));
-    if (!wallet || "error" in wallet) return wallet?.error || { error: "Wallet not found." };
-    else {
-      const newBalance = user.balance + amount;
-      await walletDao.updateWallet(user.id, { balance: newBalance });
-      return { message: "Balance updated." };
-    }
+    const newBalance = user.balance + amount;
+    return await UserDao.updateUser(user.id, { balance: newBalance });
   }
 }
 
