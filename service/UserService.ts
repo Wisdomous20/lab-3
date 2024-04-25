@@ -145,17 +145,22 @@ class UserService {
   async buyPogs(user_id: number, pog_id: number, quantity: number) {
     const getUser = await UserDao.getUserById(Number(user_id));
     if (!getUser) return { error: "User not found." };
+
     const getPog = await PogDao.getPogById(Number(pog_id));
     if (!getPog) return { error: "Pog not found." };
+
     let wallet = await walletDao.getWalletById(Number(user_id));
     if(getUser.balance < getPog.current_price * quantity) return { error: "Insufficient balance." };
+
     if (!wallet || "error" in wallet){
       wallet = await walletDao.createWallet(user_id, pog_id, quantity);
+      quantity += wallet.quantity;
       const balanace = getUser.balance - getPog.current_price * quantity;
       await UserDao.updateUser(user_id, { balance: balanace });
       return { message: "Transaction successful." };
     }else {
       const newBalance = getUser.balance - getPog.current_price * quantity;
+      quantity += wallet.quantity;
       await walletDao.updateWallet(Number(user_id), { quantity: quantity });
       await UserDao.updateUser(Number(user_id), { balance: newBalance });
       return { message: "Transaction successful." }
