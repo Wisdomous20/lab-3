@@ -68,8 +68,8 @@ class UserController {
       const awaitUser = await UserService.userLogin(email, password);
       if (typeof awaitUser === "string" || !awaitUser) res.status(404).send(awaitUser);
       else {
-        const userId = awaitUser.user?.id;
-        const userType = awaitUser.user?.userType;
+        const userId = awaitUser.id;
+        const userType = awaitUser.userType;
         const token = jwt.sign(awaitUser, 'super secret key here');
         const send = { userId, token, userType };
         res.status(200).send(send);
@@ -81,9 +81,9 @@ class UserController {
   }
 
   async buyPogs(req: express.Request, res: express.Response) {
-    const { user_id, pog_id, quantity } = req.body;
+    const { userId, pogsId, quantity } = req.body;
     try {
-      const user = await UserService.buyPogs(user_id, pog_id, quantity);
+      const user = await UserService.buyPogs(Number(userId), Number(pogsId), Number(quantity));
       res.status(200).send(user);
     } catch (error) {
       console.error(error);

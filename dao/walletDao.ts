@@ -3,11 +3,11 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 class WalletDao {
-    async getAllWallets(){
+    async getAllWallets() {
         return await prisma.wallet.findMany();
     }
 
-    async getWalletById(id: number){
+    async getWalletById(id: number) {
         return await prisma.wallet.findUnique({
             where: {
                 id: id
@@ -15,28 +15,31 @@ class WalletDao {
         });
     }
 
-    async createWallet(data: any){
-        return await prisma.wallet.create({
-            data
+    async createWallet(userId: number, pogsId: number, quantity: number) {
+        const wallet = await prisma.wallet.create({
+            data: {
+                userId,
+                pogsId,
+                quantity: quantity,
+            },
         });
+        return wallet;
     }
 
-    async updateWallet(id: number, data: any){
+    async updateWallet(id: number, data: any) {
         return await prisma.wallet.update({
             where: { id },
             data
         });
-
-
     }
 
-    async deleteWallet(id: number){
+    async deleteWallet(id: number) {
         return await prisma.wallet.delete({
             where: { id }
         });
     }
 
-    async getWalletByUser(user_id: number){
+    async getWalletByUser(user_id: number) {
         const user = await prisma.wallet.findMany({
             where: {
                 userId: user_id
@@ -48,3 +51,13 @@ class WalletDao {
 }
 
 export default new WalletDao();
+
+// const wallet = new WalletDao();
+
+// async function createWallet() {
+//     const newWallet = await wallet.createWallet(3,3,10);
+
+//     console.log(newWallet);
+// }
+
+// createWallet()

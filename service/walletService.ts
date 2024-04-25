@@ -33,12 +33,12 @@ class WalletService {
         }
     }
 
-    async createWallet(data: any) {
-        if (!data) {
+    async createWallet(userId: number, pogsId: number, quantity: number) {
+        if (!userId || !pogsId || !quantity) {
             return { error: 'Invalid data' };
         }
         try {
-            const wallet = await walletDao.createWallet(data);
+            const wallet = await walletDao.createWallet(userId, pogsId, quantity);
             return wallet;
         } catch (error) {
             console.error(error);

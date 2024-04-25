@@ -34,8 +34,9 @@ class WalletController {
 
     async createWallet(req: express.Request, res: express.Response) {
         const data = req.body;
+        const { userId, pogsId, quantity } = data; // Destructure the data object to get the userId, pogsId, and quantity
         try {
-            const wallet = await walletService.createWallet(data);
+            const wallet = await walletService.createWallet(userId, pogsId, quantity); // Pass the userId, pogsId, and quantity as arguments
             if ('error' in wallet) {
                 res.status(400).send(wallet);
             } else {

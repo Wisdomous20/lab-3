@@ -7,7 +7,7 @@ export const auth = (req: any, res: any, next: any) => {
     jwt.verify(authHeader, 'super secret key here', (err: any, user: any) => {
       if (err) return res.status(403).send('Invalid Token');
       req.user = user;
-      next();
+      next(); 
     });
   } catch (error) {
     res.status(400).send('Invalid Token');

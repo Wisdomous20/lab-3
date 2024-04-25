@@ -61,16 +61,19 @@ class UserService {
     }
     try {
       const user = await UserDao.getUserByEmail(email);
+      console.log("User ID: ", user!.id)
       if (!user) return { error: "User not found." };
   
       const isMatch = await bcrypt.compare(password, user.password);
-      if (isMatch) {
-        const token = jwt.sign({ _id: user.id?.toString(), name: user.username }, SECRET_KEY, {
+      if (!isMatch) {
+        return { error: 'Password incorrect.' };
+      } else {
+        const token = jwt.sign({ userId: user.id.toString(), name: user.username }, SECRET_KEY, {
           expiresIn: '2 days',
         });
-        return { user: { id: user.id, name: user.username, userType: user.type }, token: token };
-      } else {
-        return { error: 'Password incorrect.' };
+        console.log("User ID: ", user!.id )
+        console.log("Token: ", token)
+        return { id: user.id!, name: user.username, userType: user.type, token };
       }
     } catch (error) {
       console.error(error);
@@ -140,20 +143,22 @@ class UserService {
 
 
   async buyPogs(user_id: number, pog_id: number, quantity: number) {
-    const getUser = await UserDao.getUserById(user_id);
+    const getUser = await UserDao.getUserById(Number(user_id));
     if (!getUser) return { error: "User not found." };
-    const getPog = await PogDao.getPogById(pog_id);
+    const getPog = await PogDao.getPogById(Number(pog_id));
     if (!getPog) return { error: "Pog not found." };
-    const wallet = await walletDao.getWalletById(user_id);
-    if (!wallet || "error" in wallet) return wallet?.error || { error: "Wallet not found." };
-    else {
-      if (wallet.balance < getPog.current_price * quantity) {
-        return { error: "Insufficient balance." };
-      } else {
-        const newBalance = wallet.balance - getPog.current_price * quantity;
-        await walletDao.updateWallet(user_id, { balance: newBalance });
-        return { message: "Transaction successful." }
-      }
+    let wallet = await walletDao.getWalletById(Number(user_id));
+    if(getUser.balance < getPog.current_price * quantity) return { error: "Insufficient balance." };
+    if (!wallet || "error" in wallet){
+      wallet = await walletDao.createWallet(user_id, pog_id, quantity);
+      const balanace = getUser.balance - getPog.current_price * quantity;
+      await UserDao.updateUser(user_id, { balance: balanace });
+      return { message: "Transaction successful." };
+    }else {
+      const newBalance = getUser.balance - getPog.current_price * quantity;
+      await walletDao.updateWallet(Number(user_id), { quantity: quantity });
+      await UserDao.updateUser(Number(user_id), { balance: newBalance });
+      return { message: "Transaction successful." }
     }
   }
 
@@ -165,8 +170,8 @@ class UserService {
     const wallet = await walletDao.getWalletById(user_id);
     if (!wallet || "error" in wallet) return wallet?.error || { error: "Wallet not found." };
     else {
-      const newBalance = wallet.balance + pog.current_price * quantity;
-      await walletDao.updateWallet(wallet.id, { balance: newBalance });
+      const newBalance = user.balance + pog.current_price * quantity;
+      await walletDao.updateWallet(user.id, { balance: newBalance });
       return { message: "Transaction successful." };
     }
   }
@@ -177,11 +182,20 @@ class UserService {
     const wallet = await walletDao.getWalletById(user_id);
     if (!wallet || "error" in wallet) return wallet?.error || { error: "Wallet not found." };
     else {
-      const newBalance = wallet.balance + amount;
-      await walletDao.updateWallet(wallet.id, { balance: newBalance });
+      const newBalance = user.balance + amount;
+      await walletDao.updateWallet(user.id, { balance: newBalance });
       return { message: "Balance updated." };
     }
   }
 }
 
 export default new UserService();
+
+// const user = new UserService();
+
+// async function buyPogs() {
+//   const buyPogs = await user.buyPogs(1, 1, 1);
+//   console.log(buyPogs);
+// }
+
+// buyPogs()
