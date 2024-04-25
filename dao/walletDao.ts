@@ -7,11 +7,10 @@ class WalletDao {
         return await prisma.wallet.findMany();
     }
 
-    async getWalletById(id: number, pogsId: number) {
+    async getWalletById(id: number) {
         return await prisma.wallet.findUnique({
             where: {
-                id: id,
-                pogsId: pogsId
+                id: id
             }
         });
     }
@@ -27,9 +26,12 @@ class WalletDao {
         return wallet;
     }
 
-    async updateWallet(id: number, data: any) {
+    async updateWallet(userId:number, pogsId: number, data: any) {
+        const wallet = await this.getWalletByUser(userId, pogsId);
         return await prisma.wallet.update({
-            where: { id },
+            where: { 
+                id: wallet.id
+             },
             data
         });
     }
@@ -40,15 +42,15 @@ class WalletDao {
         });
     }
 
-    async getWalletByUser(user_id: number) {
-        const user = await prisma.wallet.findMany({
-            where: {
-                userId: user_id
-            }
+    async getWalletByUser(user_id: number, pogs_id: number) {
+        const wallet = await prisma.wallet.findMany({
+          where: {
+            userId: user_id,
+            pogsId: pogs_id
+          },
         });
-
-        return user;
-    }
+        return wallet[0];
+      }
 }
 
 export default new WalletDao();

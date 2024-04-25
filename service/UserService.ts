@@ -63,7 +63,7 @@ class UserService {
       const user = await UserDao.getUserByEmail(email);
       console.log("User ID: ", user!.id)
       if (!user) return { error: "User not found." };
-  
+
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return { error: 'Password incorrect.' };
@@ -71,7 +71,7 @@ class UserService {
         const token = jwt.sign({ userId: user.id.toString(), name: user.username }, SECRET_KEY, {
           expiresIn: '2 days',
         });
-        console.log("User ID: ", user!.id )
+        console.log("User ID: ", user!.id)
         console.log("Token: ", token)
         return { id: user.id!, name: user.username, userType: user.type, token };
       }
@@ -80,7 +80,7 @@ class UserService {
       return { error: "Internal Server Error." };
     }
   }
-  
+
   async registerUser(email: string, username: string, password: string) {
     if (!email || !username || !password) {
       return { error: 'Bad Request.' };
@@ -96,13 +96,13 @@ class UserService {
 
         return newUser
       }
-      
+
     } catch (error) {
       console.error(error);
       return { error: 'Internal Server Error.' };
     }
   }
-  
+
 
   async updateUser(id: number, data: any) {
     if (!id || !data || Object.keys(data).length === 0) {
@@ -143,42 +143,48 @@ class UserService {
 
 
   async buyPogs(user_id: number, pog_id: number, quantity: number) {
-    const getUser = await UserDao.getUserById(Number(user_id));
+    const getUser = await UserDao.getUserById(user_id);
     if (!getUser) return { error: "User not found." };
-
-    const getPog = await PogDao.getPogById(Number(pog_id));
+  
+    const getPog = await PogDao.getPogById(pog_id);
     if (!getPog) return { error: "Pog not found." };
-    let wallet = await walletDao.getWalletById(Number(user_id), Number(pog_id));
-    if(getUser.balance < getPog.current_price * quantity) return { error: "Insufficient balance." };
-
-    if (!wallet || "error" in wallet){
+  
+    const currentPrice = getPog.current_price * quantity;
+    if (getUser.balance < currentPrice) return { error: "Insufficient balance." };
+  
+    let wallet = await walletDao.getWalletByUser(user_id, pog_id);
+  
+    if (!wallet || "error" in wallet) {
       wallet = await walletDao.createWallet(user_id, pog_id, quantity);
+    } else {
       quantity += wallet.quantity;
-      const balanace = getUser.balance - getPog.current_price * quantity;
-      await UserDao.updateUser(user_id, { balance: balanace });
-      return { message: "Transaction successful." };
-    }else {
-      const newBalance = getUser.balance - getPog.current_price * quantity;
-      quantity += wallet.quantity;
-      await walletDao.updateWallet(Number(user_id), { quantity: quantity });
-      await UserDao.updateUser(Number(user_id), { balance: newBalance });
-      return { message: "Transaction successful." }
+      await walletDao.updateWallet(user_id, pog_id, { quantity: quantity });
     }
+  
+    const newBalance = getUser.balance - currentPrice;
+    await UserDao.updateUser(user_id, { balance: newBalance });
+  
+    return { message: "Transaction successful." };
   }
 
   async sellPogs(user_id: number, pog_id: number, quantity: number) {
-    const user = await UserDao.getUserById(Number(user_id));
-    if (!user) return { error: "User not found." };
-    const pog = await PogDao.getPogById(Number(pog_id));
+    const getUser = await UserDao.getUserById(user_id);
+    if (!getUser) return { error: "User not found." };
+  
+    const pog = await PogDao.getPogById(pog_id);
     if (!pog) return { error: "Pog not found." };
-    const wallet = await walletDao.getWalletById(Number(user_id), Number(pog_id));
+  
+    const wallet = await walletDao.getWalletByUser(user_id, pog_id);
     if (!wallet || "error" in wallet) return wallet?.error || { error: "Wallet not found." };
-    else {
-      const newBalance = user.balance + pog.current_price * quantity;
-      await walletDao.updateWallet(user.id, { balance: newBalance });
-      return { message: "Transaction successful." };
-    }
+
+    const newQuantity = wallet.quantity - quantity;
+    const newBalance = getUser.balance + pog.current_price * quantity;
+    await UserDao.updateUser(user_id,{ balance: newBalance });
+    await walletDao.updateWallet(user_id, pog_id, { quantity: newQuantity });
+  
+    return { message: "Transaction successful." };
   }
+  
 
   async increaseBalance(user_id: number, amount: number) {
     const user = await UserDao.getUserById(Number(user_id));

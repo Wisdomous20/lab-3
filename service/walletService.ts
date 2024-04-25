@@ -16,12 +16,12 @@ class WalletService {
         }
     }
 
-    async getWalletById(id: number, pogsId: number) {
+    async getWalletById(id: number) {
         if (!id) {
             return { error: 'Invalid id' };
         }
         try {
-            const wallet = await walletDao.getWalletById(id, pogsId);
+            const wallet = await walletDao.getWalletById(id);
             if (!wallet) {
                 return { error: 'Wallet not found' };
             } else {
@@ -46,17 +46,17 @@ class WalletService {
         }
     }
 
-    async updateWallet(id: number, data: any, pogsId: number) {
-        if (!id || !data || Object.keys(data).length === 0) {
+    async updateWallet(userId: number, data: any, pogsId: number) {
+        if (!userId || !data || !pogsId ||Object.keys(data).length === 0) {
             return { error: 'Invalid data' };
         }
 
         try {
-            const wallet = await walletDao.getWalletById(id,pogsId);
+            const wallet = await walletDao.getWalletByUser(userId, pogsId);
             if (!wallet) {
                 return { error: 'Wallet not found' };
             } else {
-                const updatedWallet = await walletDao.updateWallet(id, data);
+                const updatedWallet = await walletDao.updateWallet(userId, pogsId, data);
                 return updatedWallet;
             }
         } catch (error) {
@@ -70,7 +70,7 @@ class WalletService {
             return { error: 'Invalid id' };
         }
         try {
-            const wallet = await walletDao.getWalletById(id, pogsId);
+            const wallet = await walletDao.getWalletById(id);
             if (!wallet) {
                 return { error: 'Wallet not found' };
             } else {
@@ -83,12 +83,12 @@ class WalletService {
         }
     }
 
-    async getWalletByUser(user_id: number) {
+    async getWalletByUser(user_id: number, pogsId: number) {
         if(!user_id){
             return { error: 'Invalid user_id' };
         }
         try{
-            const wallet = await walletDao.getWalletByUser(user_id);
+            const wallet = await walletDao.getWalletByUser(user_id, pogsId);
             if(!wallet){
                 return { error: 'Wallet not found' };
             }else{
