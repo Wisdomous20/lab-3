@@ -168,11 +168,11 @@ class UserService {
   }
 
   async sellPogs(user_id: number, pog_id: number, quantity: number) {
-    const user = await UserDao.getUserById(user_id);
+    const user = await UserDao.getUserById(Number(user_id));
     if (!user) return { error: "User not found." };
-    const pog = await PogDao.getPogById(pog_id);
+    const pog = await PogDao.getPogById(Number(pog_id));
     if (!pog) return { error: "Pog not found." };
-    const wallet = await walletDao.getWalletById(user_id);
+    const wallet = await walletDao.getWalletById(Number(user_id));
     if (!wallet || "error" in wallet) return wallet?.error || { error: "Wallet not found." };
     else {
       const newBalance = user.balance + pog.current_price * quantity;
@@ -182,9 +182,9 @@ class UserService {
   }
 
   async increaseBalance(user_id: number, amount: number) {
-    const user = await UserDao.getUserById(user_id);
+    const user = await UserDao.getUserById(Number(user_id));
     if (!user) return { error: "User not found." };
-    const wallet = await walletDao.getWalletById(user_id);
+    const wallet = await walletDao.getWalletById(Number(user_id));
     if (!wallet || "error" in wallet) return wallet?.error || { error: "Wallet not found." };
     else {
       const newBalance = user.balance + amount;
