@@ -4,7 +4,6 @@ import UserService from "../service/UserService";
 import jwt from 'jsonwebtoken';
 
 
-
 class UserController {
 
   async getAllUsers(req: express.Request, res: express.Response) {
@@ -65,13 +64,13 @@ class UserController {
   async userLogin(req: express.Request, res: express.Response) {
     const { email, password } = req.body;
     try {
-      const awaitUser = await UserService.userLogin(email, password);
-      if (typeof awaitUser === "string" || !awaitUser) res.status(404).send(awaitUser);
+      const user = await UserService.userLogin(email, password);
+      if (typeof user === "string" || user === undefined) res.status(404).send(user);
       else {
-        const userId = awaitUser.id;
-        const userType = awaitUser.userType;
-        const token = jwt.sign(awaitUser, 'super secret key here');
-        const send = { userId, token, userType };
+        const userId = user.id;
+        const userType = user.type;
+        const token = jwt.sign({ userId, userType }, process.env.JWT_SECRET || 'default-secret');
+        const send = { userId, token };
         res.status(200).send(send);
       }
     } catch (error) {

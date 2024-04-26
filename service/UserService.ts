@@ -55,29 +55,10 @@ class UserService {
   }
 
   async userLogin(email: string, password: string) {
-    const SECRET_KEY = process.env.SECRET_KEY || 'default_secret_key';
-    if (!email || !password) {
-      return { error: 'Bad Request.' };
-    }
-    try {
-      const user = await UserDao.getUserByEmail(email);
-      console.log("User ID: ", user!.id)
-      if (!user) return { error: "User not found." };
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return { error: 'Password incorrect.' };
-      } else {
-        const token = jwt.sign({ userId: user.id.toString(), name: user.username }, SECRET_KEY, {
-          expiresIn: '2 days',
-        });
-        console.log("User ID: ", user!.id)
-        console.log("Token: ", token)
-        return { id: user.id!, name: user.username, userType: user.type, token };
-      }
-    } catch (error) {
-      console.error(error);
-      return { error: "Internal Server Error." };
+    const user = await this.getUserByEmail(email)
+    if ("error" in user) return user.error;
+    if (await bcrypt.compare(password, user.password)) {
+      return user;
     }
   }
 
